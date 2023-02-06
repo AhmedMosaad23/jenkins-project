@@ -1,13 +1,13 @@
 pipeline {
     agent { label 'jenkins-agent' }
     parameters {
-        choice(name: 'ENV', choices: ['dev', 'test', 'prod',"release"])
+        choice(name: 'main', choices: ['dev', 'test', 'prod',"release"])
     } 
     stages {
         stage('build') {
             steps {
                 script {
-                   if (params.ENV == "release") {
+                   if (params.main == "release") {
                        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                            sh """
                                 docker login -u $USERNAME -p $PASSWORD
@@ -23,7 +23,7 @@ pipeline {
         stage('deploy') {
             steps {
                 script {
-                    if (params.ENV == "dev" || params.ENV == "test" || params.ENV == "prod") {
+                    if (params.main == "dev" || params.main == "test" || params.main == "prod") {
                             withCredentials([file(credentialsId: 'kubernetes_kubeconfig', variable: 'KUBECONFIG')]) {
                           sh """
                               export BUILD_NUMBER=\$(cat ../jenkins-pro.txt)
